@@ -8,18 +8,16 @@ import java.sql.*;
 
 public class UserDao {
     ConnectionMaker connectionMaker;
-    Connection c;
 
     public UserDao(ConnectionMaker connectionMaker) {
         this.connectionMaker = connectionMaker;
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-//        Connection c = connectionMaker.makeConnection(); // 읽기니까 괜찮음
-        this.c = connectionMaker.makeConnection(); // 쓰기 허용
+        Connection c = connectionMaker.makeConnection();
 
         PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values(?,?,?)");
-        ps.setString(1, user.getId()); // 메소드 매개변수로 읽기 해결
+        ps.setString(1, user.getId());
         ps.setString(2, user.getName());
         ps.setString(3, user.getPassword());
 
