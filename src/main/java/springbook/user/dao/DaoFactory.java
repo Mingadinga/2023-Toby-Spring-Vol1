@@ -1,6 +1,6 @@
 package springbook.user.dao;
 
-public class UserDaoFactory {
+public class DaoFactory {
     public UserDao userDao() {
         return new UserDao(connectionMaker());
     }

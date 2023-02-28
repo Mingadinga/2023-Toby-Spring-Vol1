@@ -48,7 +48,7 @@ public class UserDao {
 
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        UserDao dao = new UserDaoFactory().userDao();
+        UserDao dao = new DaoFactory().userDao();
 
         User user = new User();
         user.setId("minpearl");
