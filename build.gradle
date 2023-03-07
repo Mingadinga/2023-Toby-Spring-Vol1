@@ -12,6 +12,17 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation group: 'commons-logging', name: 'commons-logging', version: '1.1.1'
+    implementation group: 'cglib', name: 'cglib', version: '2.2.2'
+    implementation group: 'org.springframework', name: 'spring-asm', version: '3.0.7.RELEASE'
+    implementation group: 'org.springframework', name: 'spring-beans', version: '3.0.7.RELEASE'
+    implementation group: 'org.springframework', name: 'spring-context', version: '3.0.7.RELEASE'
+    implementation group: 'org.springframework', name: 'spring-context-support', version: '3.0.7.RELEASE'
+    implementation group: 'org.springframework', name: 'spring-core', version: '3.0.7.RELEASE'
+    implementation group: 'org.springframework', name: 'spring-expression', version: '3.0.7.RELEASE'
+    implementation group: 'org.springframework', name: 'spring-jdbc', version: '3.0.7.RELEASE'
+
     implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.27'
 }
 
