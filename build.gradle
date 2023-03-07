@@ -12,6 +12,8 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.assertj:assertj-core:3.20.2'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
 
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.1.1'
     implementation group: 'cglib', name: 'cglib', version: '2.2.2'
