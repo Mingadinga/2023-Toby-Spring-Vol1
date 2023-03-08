@@ -10,8 +10,12 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+//    testImplementation group: 'org.junit', name: 'com.springsource.org.junit', version: '4.7.0'
+    testImplementation group: 'org.springframework', name: 'spring-test', version: '3.0.7.RELEASE'
+
     testImplementation 'org.assertj:assertj-core:3.20.2'
     testImplementation 'org.hamcrest:hamcrest:2.2'
 
