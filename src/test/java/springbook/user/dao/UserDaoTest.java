@@ -1,16 +1,15 @@
 package springbook.user.dao;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import springbook.user.domain.User;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class UserDaoTest {
@@ -19,13 +18,15 @@ public class UserDaoTest {
     private User user2;
     private User user3;
 
-    @BeforeEach
+    @Before
     public void setUp() {
-        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
-        this.dao = context.getBean("userDao", UserDao.class);
         this.user1 = new User("minpearl", "민휘", "lololo");
         this.user2 = new User("seeun", "세은", "030614");
         this.user3 = new User("kong", "콩이", "piggy");
+
+        this.dao = new UserDao();
+        DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/toby", "root", "star0826", true);
+        dao.setDataSource(dataSource);
     }
 
     @Test
@@ -61,14 +62,12 @@ public class UserDaoTest {
         assertThat(dao.getCount(), is(3));
     }
 
-    @Test
+    @Test(expected = EmptyResultDataAccessException.class)
     public void getUserFailure() throws SQLException {
         dao.deleteAll();
         assertThat(dao.getCount(), is(0));
 
-        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> {
-            dao.get("unknown_id");
-        });
+        dao.get("unknown_id");
     }
 
 }
