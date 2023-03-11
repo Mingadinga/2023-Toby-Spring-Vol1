@@ -1,18 +1,28 @@
 package springbook.user.dao;
 
+import com.mysql.jdbc.Driver;
 import org.junit.Before;
 import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.domain.User;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration(locations = "UserDaoTest-context.xml")
 public class UserDaoTest {
+
     private UserDao dao;
     private User user1;
     private User user2;
@@ -27,6 +37,9 @@ public class UserDaoTest {
         this.dao = new UserDao();
         DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/toby", "root", "star0826", true);
         dao.setDataSource(dataSource);
+        JdbcContext jdbcContext = new JdbcContext();
+        jdbcContext.setDataSource(dataSource);
+        dao.setJdbcContext(jdbcContext);
     }
 
     @Test
