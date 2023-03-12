@@ -81,8 +81,7 @@ public class UserDao {
 
     // 클라이이언트 : DI
     public void deleteAll() throws SQLException {
-        StatementStrategy st = c -> c.prepareStatement("delete from users");
-        jdbcContext.workWithStatementStrategy(st);
+        jdbcContext.executeSQL("delete from users");
     }
 
     public int getCount() throws SQLException {

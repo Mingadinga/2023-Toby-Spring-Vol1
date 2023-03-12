@@ -38,4 +38,8 @@ public class JdbcContext {
             }
         }
     }
+
+    public void executeSQL(String sql) throws SQLException {
+        workWithStatementStrategy(c -> c.prepareStatement(sql));
+    }
 }
