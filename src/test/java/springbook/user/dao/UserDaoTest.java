@@ -5,8 +5,12 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import springbook.user.domain.User;
 
 import javax.sql.DataSource;
@@ -15,7 +19,8 @@ import java.util.List;
 
 public class UserDaoTest {
 
-    private UserDao dao;
+    private UserDaoJdbc dao;
+    private DataSource dataSource;
     private User user1;
     private User user2;
     private User user3;
@@ -26,9 +31,13 @@ public class UserDaoTest {
         this.user2 = new User("seeun", "세은", "030614");
         this.user3 = new User("kong", "콩이", "piggy");
 
-        this.dao = new UserDao();
+        this.dao = new UserDaoJdbc();
         DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/toby", "root", "star0826", true);
         dao.setDataSource(dataSource);
+    }
+
+    private void setDataSource() {
+        this.dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/toby", "root", "star0826", true);
     }
 
     @Test
@@ -100,8 +109,35 @@ public class UserDaoTest {
     public void getUserFailure() throws SQLException {
         dao.deleteAll();
         assertThat(dao.getCount(), is(0));
-
         dao.get("unknown_id");
+    }
+
+    // expected 지우고 실행해보면
+    // DuplicateKeyException이 발생함을 알수있음
+    @Test(expected = DataAccessException.class)
+    public void duplicateKey() {
+        dao.deleteAll();
+
+        dao.add(user1);
+        dao.add(user1);
+    }
+
+    // SQLException 직접 해석해서 DataAccessException 변환하기
+    @Test
+    public void sqlExceptionTranslate() {
+        dao.deleteAll();
+
+        try {
+            setDataSource();
+            dao.add(user1);
+            dao.add(user2);
+        }
+        catch (DuplicateKeyException ex) {
+            SQLException sqlEx = (SQLException) ex.getRootCause();
+            // jdbc가 사용하는 예외로 번역함
+            SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
+            assertThat(set.translate(null, null, null), is(DuplicateKeyException.class));
+        }
     }
 
 }
