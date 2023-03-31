@@ -27,9 +27,9 @@ public class UserDaoTest {
 
     @Before
     public void setUp() throws SQLException {
-        this.user1 = new User("minpearl", "민휘", "lololo");
-        this.user2 = new User("seeun", "세은", "030614");
-        this.user3 = new User("kong", "콩이", "piggy");
+        this.user1 = new User("minpearl", "민휘", "lololo", Level.BASIC, 1, 0);
+        this.user2 = new User("seeun", "세은", "030614", Level.SILVER, 55, 10);
+        this.user3 = new User("kong", "콩이", "piggy", Level.GOLD, 100, 40);
 
         this.dao = new UserDaoJdbc();
         DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/toby", "root", "star0826", true);
@@ -50,12 +50,10 @@ public class UserDaoTest {
         assertThat(dao.getCount(), is(2));
 
         User userget1 = dao.get(user1.getId());
-        assertThat(userget1.getName(), is(user1.getName()));
-        assertThat(userget1.getPassword(), is(user1.getPassword()));
+        checkSameUser(user1, userget1);
 
         User userget2 = dao.get(user2.getId());
-        assertThat(userget2.getName(), is(user2.getName()));
-        assertThat(userget2.getPassword(), is(user2.getPassword()));
+        checkSameUser(user2, userget2);
     }
 
     @Test
@@ -88,6 +86,9 @@ public class UserDaoTest {
         assertThat(user1.getId(), is(user2.getId()));
         assertThat(user1.getName(), is(user2.getName()));
         assertThat(user1.getPassword(), is(user2.getPassword()));
+        assertThat(user1.getLevel(), is(user2.getLevel()));
+        assertThat(user1.getLogin(), is(user2.getLogin()));
+        assertThat(user1.getRecommend(), is(user2.getRecommend()));
     }
 
     @Test
@@ -138,6 +139,29 @@ public class UserDaoTest {
             SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
             assertThat(set.translate(null, null, null), is(DuplicateKeyException.class));
         }
+    }
+
+    // 수정하지 않아야할 값도 보존하는지 확인
+    @Test
+    public void update() {
+        dao.deleteAll();
+
+        dao.add(user1); // 수정할 사용자
+        dao.add(user2); // 수정하지 않을 사용자
+
+        user1.setName("민휘");
+        user1.setPassword("hello");
+        user1.setLevel(Level.GOLD);
+        user1.setLogin(1000);
+        user1.setRecommend(999);
+
+        dao.update(user1);
+
+        User user1Update = dao.get(user1.getId());
+        checkSameUser(user1, user1Update);
+
+        User user2Update = dao.get(user2.getId());
+        checkSameUser(user2, user2Update);
     }
 
 }

@@ -2,7 +2,6 @@ package springbook.user.dao;
 
 import springbook.user.domain.User;
 
-import java.util.Arrays;
 import java.util.List;
 
 public interface UserDao {
@@ -11,5 +10,5 @@ public interface UserDao {
     List<User> getAll();
     void deleteAll();
     int getCount();
-
+    void update(User user1);
 }
