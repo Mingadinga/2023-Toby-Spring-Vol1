@@ -4,6 +4,13 @@ public enum Level {
 
     BASIC(1), SILVER(2), GOLD(3);
     private final int value;
+    private Level next;
+
+    static {
+        BASIC.next = SILVER;
+        SILVER.next = GOLD;
+        GOLD.next = null;
+    }
 
     Level(int value) {
         this.value = value;
@@ -11,6 +18,10 @@ public enum Level {
 
     public int intValue() {
         return this.value;
+    }
+
+    public Level nextLevel() {
+        return this.next;
     }
 
     public static Level valueOf(int value) {
@@ -21,4 +32,5 @@ public enum Level {
             default: throw new AssertionError("Unknown value: " + value);
         }
     }
+
 }
