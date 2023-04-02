@@ -27,9 +27,9 @@ public class UserDaoTest {
 
     @Before
     public void setUp() throws SQLException {
-        this.user1 = new User("minpearl", "민휘", "lololo", Level.BASIC, 1, 0);
-        this.user2 = new User("seeun", "세은", "030614", Level.SILVER, 55, 10);
-        this.user3 = new User("kong", "콩이", "piggy", Level.GOLD, 100, 40);
+        this.user1 = new User("minpearl", "민휘", "lololo", Level.BASIC, 1, 0, "minpearl0826@gmail.com");
+        this.user2 = new User("seeun", "세은", "030614", Level.SILVER, 55, 10, "seeun@gmail.com");
+        this.user3 = new User("kong", "콩이", "piggy", Level.GOLD, 100, 40, "kong@gmail.com");
 
         this.dao = new UserDaoJdbc();
         DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/toby", "root", "star0826", true);

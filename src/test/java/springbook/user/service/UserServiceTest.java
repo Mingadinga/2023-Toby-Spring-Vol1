@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.mail.MailSender;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import springbook.user.dao.Level;
 import springbook.user.dao.UserDao;
@@ -29,15 +31,16 @@ public class UserServiceTest {
     List<User> users;
     DataSource dataSource;
     PlatformTransactionManager transactionManager;
+    MailSender mailSender;
 
     @Before
     public void setUp() {
         users = Arrays.asList(
-                new User("1minpearl", "민휘", "lololo", Level.BASIC, 49, 0),
-                new User("2seeun", "세은", "030614", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 10),
-                new User("3kong", "콩이", "piggy", Level.SILVER, 60, 29),
-                new User("4nyaong", "냐옹이", "chatter", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLR),
-                new User("5ming", "밍밍이", "cheek", Level.GOLD, 100, 100));
+                new User("1minpearl", "민휘", "lololo", Level.BASIC, 49, 0, "minpearl0826@gmail.com"),
+                new User("2seeun", "세은", "030614", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 10, "seeun@gmail.com"),
+                new User("3kong", "콩이", "piggy", Level.SILVER, 60, 29, "kong@gmail.com"),
+                new User("4nyaong", "냐옹이", "chatter", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLR, "nyong@gmail.com"),
+                new User("5ming", "밍밍이", "cheek", Level.GOLD, 100, 100, "ming@gmail.com"));
 
         this.dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/toby", "root", "star0826", true);
         UserDaoJdbc userDaoJdbc = new UserDaoJdbc();
@@ -46,6 +49,8 @@ public class UserServiceTest {
         this.userService = new UserService();
         this.userService.setUserDao(userDao);
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
+        userService.setTransactionManager(this.transactionManager);
+        this.mailSender = new DummyMailSender();
     }
 
     @Test
@@ -54,9 +59,13 @@ public class UserServiceTest {
     }
 
     @Test
+    @DirtiesContext // 컨텍스트의 DI 설정을 변경하는 테스트이다
     public void upgradeLevels() {
         userDao.deleteAll();
         for(User user:users) userDao.add(user);
+
+        MockMailSender mockMailSender = new MockMailSender();
+        userService.setMailSender(mockMailSender);
 
         userService.upgradeLevels();
 
@@ -65,6 +74,11 @@ public class UserServiceTest {
         checkLevelUpgraded(users.get(2), false);
         checkLevelUpgraded(users.get(3), true);
         checkLevelUpgraded(users.get(4), false);
+
+        List<String> request = mockMailSender.getRequests();
+        assertThat(request.size(), is(2));
+        assertThat(request.get(0), is(users.get(1).getEmail()));
+        assertThat(request.get(1), is(users.get(3).getEmail()));
     }
 
     @Test
@@ -85,11 +99,12 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeAllOrNothing() throws Exception {
+    public void upgradeAllOrNothing() {
         UserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.setDataSource(this.dataSource);
         testUserService.setTransactionManager(this.transactionManager);
+        testUserService.setMailSender(this.mailSender);
 
         userDao.deleteAll();
         for(User user: users) userDao.add(user);
