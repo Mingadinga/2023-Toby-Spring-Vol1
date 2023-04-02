@@ -1,22 +1,46 @@
 package springbook.user.service;
 
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import springbook.user.dao.Level;
 import springbook.user.dao.UserDao;
 import springbook.user.domain.User;
 
+import javax.sql.DataSource;
 import java.util.List;
 
 public class UserService {
     UserDao userDao;
 
+    DataSource dataSource;
+
+    PlatformTransactionManager transactionManager;
+
     public void setUserDao(UserDao userDao) {
         this.userDao = userDao;
     }
 
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
     public void upgradeLevels() {
-        List<User> users = userDao.getAll();
-        for(User user: users) {
-            if(canUpgradeLevel(user)) upgradeLevel(user);
+        // 트랜잭션 생성과 시작
+        TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        try {
+            List<User> users = userDao.getAll();
+            for(User user: users) {
+                if(canUpgradeLevel(user)) upgradeLevel(user);
+            }
+            transactionManager.commit(status); // 정상 종료
+        } catch (Exception e) {
+            transactionManager.rollback(status); // 비정상 종료
+            throw e;
         }
     }
 
@@ -33,16 +57,11 @@ public class UserService {
         }
     }
 
-    private void upgradeLevel(User user) {
-        // user의 레벨을 받아서 다음 레벨로 넘겨주는 작업
-        // 비즈니스 로직에서 특정 레벨의 다음 레벨을 결정하는 것보다는
-        // User 정보를 가장 잘 알고 있는 User 객체에게 요청하여 다음 레벨을 정보를 얻어오자
+    protected void upgradeLevel(User user) {
         user.upgradeLevel();
         userDao.update(user);
     }
 
-    // 사용자가 등록될 때 적용할만한 비즈니스 로직 : 초기화시 BASIC
-    // UserDao : 사용자 정보를 담은 User 오브젝트를 받아 DB에 넣어주는데 충실한 역할
     public void add(User user) {
         if (user.getLevel() == null) user.setLevel(Level.BASIC);
         userDao.add(user);
