@@ -18,6 +18,7 @@ dependencies {
 
     testImplementation 'org.assertj:assertj-core:3.20.2'
     testImplementation 'org.hamcrest:hamcrest:2.2'
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
 
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.1.1'
     implementation group: 'cglib', name: 'cglib', version: '2.2.2'
@@ -35,5 +36,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+
+
+//sourceCompatibility = JavaVersion.VERSION_16
+//targetCompatibility = JavaVersion.VERSION_16

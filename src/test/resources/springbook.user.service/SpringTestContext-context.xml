@@ -24,7 +24,7 @@
         <property name="jdbcContext" ref="dataSource" />
     </bean>
 
-    <bean id="userService" class="springbook.user.service.UserService">
+    <bean id="userService" class="springbook.user.service.UserServiceImpl">
         <property name="userDao" ref="userDao" />
     </bean>
 
