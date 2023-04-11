@@ -24,9 +24,27 @@
         <property name="jdbcContext" ref="dataSource" />
     </bean>
 
+    <!--
     <bean id="userService" class="springbook.user.service.UserServiceTx">
         <property name="userService" ref="userServiceImpl" />
         <property name="transactionManager" ref="transactionManager" />
+    </bean>
+    -->
+    <!--
+    <bean id="userService" class="springbook.user.service.TxProxyFactoryBean">
+        <property name="target" ref="userServiceImpl" />
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="pattern" value="upgradeLevels"/>
+        <property name="serviceInterface" value="springbook.user.service.UserService"/>
+    </bean>
+    -->
+    <bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="userServiceImpl" />
+        <property name="interceptorNames">
+            <list>
+                <value>transactionAdvisor</value>
+            </list>
+        </property>
     </bean>
 
 
@@ -44,5 +62,17 @@
         <property name="host" value="mail.server.com" />
     </bean>
 
-</beans>
+    <bean id="transactionAdvice" class="springbook.user.service.TranscationAdvice">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
 
+    <bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">
+        <property name="mappedName" value="upgrade*"/>
+    </bean>
+
+    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <property name="advice" ref="transactionAdvice"/>
+        <property name="pointcut" ref="transactionPointcut"/>
+    </bean>
+
+</beans>

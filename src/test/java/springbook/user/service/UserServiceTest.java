@@ -3,6 +3,8 @@ package springbook.user.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.mail.MailSender;
@@ -36,6 +38,7 @@ public class UserServiceTest {
     DataSource dataSource;
     PlatformTransactionManager transactionManager;
     MailSender mailSender;
+    ApplicationContext applicationContext;
 
     @Before
     public void setUp() {
@@ -154,14 +157,26 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeAllOrNothing() {
-        UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
+    public void upgradeAllOrNothing() throws Exception {
+        TestUserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.setMailSender(this.mailSender);
 
-        UserServiceTx txUserService = new UserServiceTx();
-        txUserService.setTransactionManager(transactionManager);
-        txUserService.setUserService(testUserService);
+        // 부가기능과 기능위임을 담당하는 TransactionHandler 생성
+//        TransactionHandler txHandler = new TransactionHandler();
+//        txHandler.setTarget(testUserService);
+//        txHandler.setTransactionManager(transactionManager);
+//        txHandler.setPattern("upgradeLevels");
+
+        // Proxy 생성
+//        UserService txUserService = (UserService) Proxy.newProxyInstance(
+//                getClass().getClassLoader(), new Class[] {UserService.class}, txHandler);
+
+        // 컨텍스트에서 TxProxyFactoryBean을 직접 가져와서 타깃 변경
+        // 변경된 타깃으로 다이나믹 프록시 다시 생성
+        ProxyFactoryBean txProxyFactoryBean = applicationContext.getBean("&userService", ProxyFactoryBean.class);
+        txProxyFactoryBean.setTarget(testUserService);
+        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
         userDao.deleteAll();
         for(User user: users) userDao.add(user);
