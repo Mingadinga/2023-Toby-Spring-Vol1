@@ -3,6 +3,8 @@ package learningtest.proxy;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.NameMatchMethodPointcut;
@@ -104,6 +106,49 @@ public class ReflectionTest {
         public String sayThankYou(String name) {
             return "Thank You " + name;
         }
+    }
+
+    @Test
+    public void classNamePointcutAdvisor() {
+
+        // 포인트컷 준비
+        NameMatchMethodPointcut classMethodPointcut = new NameMatchMethodPointcut() {
+            public ClassFilter getClassFilter() {
+                return new ClassFilter() {
+                    @Override
+                    public boolean matches(Class<?> clazz) {
+                        return clazz.getSimpleName().startsWith("HelloT"); // 클래스 이름이 HelloT로 시작하는 것만 선정
+                    }
+                };
+            }
+        };
+        classMethodPointcut.setMappedName("sayH*");
+
+        // 테스트
+        checkAdviced(new HelloTarget(), classMethodPointcut, true);
+//        checkAdviced(new HelloWorld(), classMethodPointcut, true);
+//        checkAdviced(new HelloToby(), classMethodPointcut, true);
+
+    }
+
+    public void checkAdviced(Object target, Pointcut pointcut, boolean adviced) {
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(target);
+        pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, new UppercaseAdvice()));
+        Hello proxiedHello = (Hello) pfBean.getObject();
+
+        if (adviced) {
+            assertThat(proxiedHello.sayHello("Toby"), is("HELLO TOBY"));
+            assertThat(proxiedHello.sayHi("Toby"), is("HI TOBY"));
+            assertThat(proxiedHello.sayThankYou("Toby"), is("Thank You Toby"));
+        } else {
+            assertThat(proxiedHello.sayHello("Toby"), is("Hello Toby"));
+            assertThat(proxiedHello.sayHi("Toby"), is("Hi Toby"));
+            assertThat(proxiedHello.sayThankYou("Toby"), is("Thank You Toby"));
+        }
+
+
+
     }
 
 
