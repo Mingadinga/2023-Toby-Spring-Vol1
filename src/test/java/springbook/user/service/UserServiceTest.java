@@ -11,6 +11,7 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 import springbook.user.dao.Level;
 import springbook.user.dao.UserDao;
 import springbook.user.dao.UserDaoJdbc;
@@ -215,5 +216,6 @@ public class UserServiceTest {
     }
 
     static class TestUserServiceException extends RuntimeException {}
+
 
 }
